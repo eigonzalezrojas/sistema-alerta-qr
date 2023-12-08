@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg min-w-full max-w-md">
+        <h1 class="text-xl font-bold text-center mb-4">Iniciar Sesión</h1>
+        <form action="/ruta-del-servidor" method="post">
+            <div class="mb-4">
+                <label for="rut" class="block text-gray-700 text-sm font-bold mb-2">RUT</label>
+                <input type="text" id="rut" name="rut" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-6">
+                <label for="clave" class="block text-gray-700 text-sm font-bold mb-2">Clave</label>
+                <input type="password" id="clave" name="clave" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="flex items-center justify-between">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
