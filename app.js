@@ -148,8 +148,9 @@ app.post('/api/cambiarEstadoAlerta', async (req, res) => {
 
 // Generar URL del QR
 app.get('/generateQR', (req, res) => {
-    const locationId = req.query.locationId;    
-    QRCode.toDataURL(`https://eithelgonzalezrojas.cl/menu.html?locationId=${locationId}`, (err, dataUrl) => {
+    const locationId = req.query.locationId;
+    const qrUrl = `https://eithelgonzalezrojas.cl/menu.html?locationId=${locationId}`;    
+    QRCode.toDataURL(qrUrl, (err, dataUrl) => {
         if (err) {
             res.status(500).json({ error: 'Error al generar el código QR' });
         } else {
