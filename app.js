@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const mysql = require('mysql');
+const QRCode = require('qrcode');
 
 require('dotenv').config();
 
@@ -55,12 +56,11 @@ app.post('/logout', (req, res) => {
 });
 
 
-
-
 // Ruta principal que muestra el index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
+
 
 // Ruta para la página de login
 app.get('/login', (req, res) => {
@@ -120,9 +120,6 @@ app.get('/api/tipoAlertas', (req, res) => {
 
 
 
-
-
-
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;
 
@@ -136,26 +133,35 @@ app.post('/api/cambiarEstadoAlerta', async (req, res) => {
 });
 
 
-
-function buscarUsuario(rut) {
-  return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM Usuarios WHERE rut = ?';
-    connection.query(query, [rut], (error, resultados) => {
-      if (error) {
-        return reject(error);
-      }
-      if (resultados.length === 0) {
-        return resolve(null);
-      }
-      const usuario = resultados[0];
-      resolve(usuario);
+app.get('/generateQR', (req, res) => {
+    const locationId = req.query.locationId;
+    // Suponiendo que generas el QR aquí...
+    QRCode.toDataURL(`https://eithelgonzalezrojas.cl/alertas?ubicacion=${locationId}`, (err, dataUrl) => {
+        if (err) {
+            res.status(500).json({ error: 'Error al generar el código QR' });
+        } else {
+            res.json({ qrCode: dataUrl });
+        }
     });
-  });
-}
+});
 
 
+app.get('/api/ubicaciones', (req, res) => {
+    const query = 'SELECT id, nombre FROM Ubicaciones';
 
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener las ubicaciones' });
+        }
 
+        if (results.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron ubicaciones' });
+        }
+
+        res.json(results);
+    });
+});
 
 
 

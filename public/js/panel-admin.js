@@ -1,6 +1,55 @@
-// En panel-admin.js
 document.addEventListener('DOMContentLoaded', function() {
-    cargarAlertas();
+    // cargarAlertas();
+    // cargarUbicaciones();
+    const seccionAlertas = document.getElementById('seccionAlertas');
+    const seccionUsuarios = document.getElementById('seccionUsuarios');
+    const seccionUbicaciones = document.getElementById('seccionUbicaciones');
+    const seccionQr = document.getElementById('seccionQR');
+
+
+
+    seccionAlertas.style.display = 'block';
+    seccionUsuarios.style.display = 'none';
+    seccionUbicaciones.style.display = 'none';
+    seccionQr.style.display = 'none';
+
+
+    linkAlertas.addEventListener('click', function (event) {
+        event.preventDefault();
+        seccionAlertas.style.display = 'block';
+        seccionUsuarios.style.display = 'none';
+        seccionUbicaciones.style.display = 'none';
+        seccionQr.style.display = 'none';
+        cargarAlertas();
+    });
+
+    linkUsuarios.addEventListener('click', function (event) {
+        event.preventDefault();
+        seccionAlertas.style.display = 'none';
+        seccionUsuarios.style.display = 'block';
+        seccionUbicaciones.style.display = 'none';
+        seccionQr.style.display = 'none';
+        
+    });
+
+    linkUbicaciones.addEventListener('click', function (event) {
+        event.preventDefault();
+        seccionAlertas.style.display = 'none';
+        seccionUsuarios.style.display = 'none';
+        seccionUbicaciones.style.display = 'block';
+        seccionQr.style.display = 'none';
+        
+    });
+
+    linkQR.addEventListener('click', function (event) {
+        event.preventDefault();
+        seccionAlertas.style.display = 'none';
+        seccionUsuarios.style.display = 'none';
+        seccionUbicaciones.style.display = 'none';
+        seccionQr.style.display = 'block';
+        cargarUbicaciones();
+    });
+
 });
 
 function cargarAlertas() {
@@ -36,6 +85,78 @@ function cargarAlertas() {
     })
     .catch(error => console.error('Error:', error));
 }
+
+
+function cargarUbicaciones() {
+    fetch('/api/ubicaciones')
+        .then(response => response.json())
+        .then(ubicaciones => {
+            const selectUbicacion = document.getElementById('selectUbicacion');
+            selectUbicacion.innerHTML = ''; // Limpia las opciones existentes
+            ubicaciones.forEach(ubicacion => {
+                let option = document.createElement('option');
+                option.value = ubicacion.id;
+                option.textContent = ubicacion.nombre;
+                selectUbicacion.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar ubicaciones:', error));
+}
+
+document.getElementById('btnGenerarQR').addEventListener('click', function() {
+    const locationId = document.getElementById('selectUbicacion').value;
+
+    fetch(`/generateQR?locationId=${locationId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud al servidor. Estado: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.qrCode) {
+                var contenedorQR = document.getElementById('contenedorQR');
+                var imagenParaImpresion = document.getElementById('imagenParaImpresion');
+
+                contenedorQR.innerHTML = `<img src="${data.qrCode}">`;
+                imagenParaImpresion.src = data.qrCode;
+                document.getElementById('btnImprimirQR').style.display = 'block';
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Código QR generado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'Cerrar'
+                });
+            } else {
+                throw new Error('Respuesta del servidor no contiene código QR');
+            }
+        })
+        .catch(error => {
+            console.error('Error al generar QR:', error);
+            Swal.fire({
+                title: 'Error',
+                text: `Hubo un problema al generar el código QR: ${error.message}`,
+                icon: 'error',
+                confirmButtonText: 'Cerrar'
+            });
+        });
+});
+
+
+
+document.getElementById('btnImprimirQR').addEventListener('click', function() {
+    var contenido = document.getElementById('contenedorImpresionQR').innerHTML;
+    var ventanaImpresion = window.open('', '_blank');
+    ventanaImpresion.document.write(contenido);
+    ventanaImpresion.document.close();
+    setTimeout(function() {
+        ventanaImpresion.focus();
+        ventanaImpresion.print();
+        ventanaImpresion.close();
+    }, 250);
+});
+
+
 
 function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
     // Enviar la solicitud al servidor para cambiar el estado

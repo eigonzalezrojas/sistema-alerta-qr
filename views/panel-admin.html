@@ -80,9 +80,6 @@
                         </tbody>
                     </table>
                 </div>
-                
-                
-
                 <!-- Contenido para Usuarios -->
                 <div id="seccionUsuarios" class="tabcontent" style="display: none;">
                     <h2>Usuarios</h2>
@@ -98,8 +95,23 @@
                 <!-- Contenido para QR -->
                 <div id="seccionQR" class="tabcontent" style="display: none;">
                     <h2>QR</h2>
-                    <!-- Contenido específico para QR -->
+                    <label for="selectUbicacion">Seleccione una Ubicación:</label>
+                    <select id="selectUbicacion" class="form-select">
+                        <!-- Las opciones se cargarán dinámicamente -->
+                    </select>
+                    <!-- Botón para generar el código QR -->
+                    <button id="btnGenerarQR" class="btn btn-primary">Generar QR</button>
+                
+                    <!-- Contenedor para mostrar el QR generado -->
+                    <div id="contenedorQR"></div>
+                
+                    <!-- Contenedor oculto para impresión -->
+                    <div id="contenedorImpresionQR" style="display: none;">
+                        <img id="imagenParaImpresion" src="">
+                    </div>
+                    <button id="btnImprimirQR" class="btn btn-secondary" style="display:none;">Imprimir QR</button>
                 </div>
+                
             </main>
         </div>
     </div>
