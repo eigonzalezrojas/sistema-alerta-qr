@@ -121,6 +121,7 @@ document.getElementById('btnGenerarQR').addEventListener('click', function() {
                 contenedorQR.innerHTML = `<img src="${data.qrCode}">`;
                 imagenParaImpresion.src = data.qrCode;
                 document.getElementById('btnImprimirQR').style.display = 'block';
+                document.getElementById('btnDescargarQR').style.display = 'block';
                 Swal.fire({
                     title: '¡Éxito!',
                     text: 'Código QR generado correctamente.',
@@ -143,7 +144,6 @@ document.getElementById('btnGenerarQR').addEventListener('click', function() {
 });
 
 
-
 document.getElementById('btnImprimirQR').addEventListener('click', function() {
     var contenido = document.getElementById('contenedorImpresionQR').innerHTML;
     var ventanaImpresion = window.open('', '_blank');
@@ -156,6 +156,18 @@ document.getElementById('btnImprimirQR').addEventListener('click', function() {
     }, 250);
 });
 
+document.getElementById('btnDescargarQR').addEventListener('click', function() {
+    var qrImagen = document.getElementById('imagenParaImpresion').src; // Asume que tu QR está en este elemento
+    var linkDescarga = document.createElement('a');
+    linkDescarga.href = qrImagen;
+
+    linkDescarga.download = 'codigoQR.png'; 
+
+    // Simula un clic en el enlace para descargar la imagen
+    document.body.appendChild(linkDescarga);
+    linkDescarga.click();
+    document.body.removeChild(linkDescarga);
+});
 
 
 function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
