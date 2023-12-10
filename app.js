@@ -4,9 +4,17 @@ const mysql = require('mysql');
 
 require('dotenv').config();
 
+const session = require('express-session');
+
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json());
+
+// Servir archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views')));
+
 
 // Conexión a la base de datos
 const connection = mysql.createConnection({
@@ -22,6 +30,7 @@ connection.connect(error => {
 });
 
 
+
 //Control de sesion navegador web - cookies
 app.use(session({
   secret: 'rutaie23#', 
@@ -30,8 +39,23 @@ app.use(session({
   cookie: { secure: true }
 }));
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
+
+// start Cerrar sesion
+app.post('/logout', (req, res) => {
+  if (req.session) {
+      req.session.destroy((error) => {
+          if (error) {
+              return res.status(500).send('No se pudo cerrar la sesión');
+          }
+          res.send('Sesión cerrada');
+      });
+  } else {
+      res.status(400).send('Sesión no iniciada');
+  }
+});
+
+
+
 
 // Ruta principal que muestra el index.html
 app.get('/', (req, res) => {
@@ -44,17 +68,90 @@ app.get('/login', (req, res) => {
 });
 
 
-// Ruta API para obtener tipos de alerta
-app.get('/api/alertas', (req, res) => {
-    connection.query('SELECT * FROM TiposAlerta', (error, resultados) => {
+app.post('/login', (req, res) => {
+    const { rut, clave } = req.body;
+    const query = 'SELECT * FROM Usuarios WHERE rut = ?';
+  
+    connection.query(query, [rut], async (error, results) => {
+      if (error) throw error;
+  
+      if (results.length === 0) {
+        return res.status(401).send('Usuario no encontrado.');
+      }
+  
+      const usuario = results[0];
+  
+      const claveValida = await bcrypt.compare(clave, usuario.clave);
+      
+      if (!claveValida) {
+        return res.status(401).send('Contraseña incorrecta.');
+      }
+  
+      // Redirige según el rol del usuario
+      switch (usuario.rol_id) {
+        case 1:
+          res.json({ success: true, redirectUrl: 'panel-admin.html' });
+          break;
+          default:
+          res.json({ success: true, redirectUrl: 'panel-user.html' });
+          break;
+      }
+    });
+  });
+
+
+// Función para obtener las alertas de la base de datos
+app.get('/api/tipoAlertas', (req, res) => {
+    const query = 'SELECT id, nombre FROM TiposAlerta';
+
+    connection.query(query, (error, results) => {
         if (error) {
-            return res.status(500).json({ mensaje: 'Error al obtener los tipos de alerta' });
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener las alertas' });
         }
-        res.json(resultados);
+
+        if (results.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron alertas' });
+        }
+
+        res.json(results);
     });
 });
 
 
+
+
+
+
+app.post('/api/cambiarEstadoAlerta', async (req, res) => {
+    const { id, estadoId } = req.body;
+
+    try {        
+        await db.query('UPDATE Alertas SET estadoId = ? WHERE id = ?', [estadoId, id]);
+        res.status(200).send('Estado actualizado');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al actualizar el estado');
+    }
+});
+
+
+
+function buscarUsuario(rut) {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT * FROM Usuarios WHERE rut = ?';
+    connection.query(query, [rut], (error, resultados) => {
+      if (error) {
+        return reject(error);
+      }
+      if (resultados.length === 0) {
+        return resolve(null);
+      }
+      const usuario = resultados[0];
+      resolve(usuario);
+    });
+  });
+}
 
 
 

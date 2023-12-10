@@ -1,25 +1,23 @@
 document.addEventListener('DOMContentLoaded', function () {
-    fetch('/api/alertas')
+    fetch('/api/tipoAlertas')
         .then(response => response.json())
-        .then(alertas => {
+        .then(alertas => {            
             const menu = document.getElementById('menuAlertas');
             alertas.forEach(alerta => {
-                // Crear botón para cada alerta
                 const btn = document.createElement('button');
                 btn.textContent = alerta.nombre;
                 btn.classList.add('btn', 'btn-primary', 'my-2');
+                btn.setAttribute('data-id', alerta.id);
                 btn.onclick = () => seleccionarAlerta(alerta.id, alertas);
                 menu.appendChild(btn);
             });
 
-            // Crear caja de texto para información adicional
             const infoAdicional = document.createElement('textarea');
             infoAdicional.placeholder = 'Información adicional (opcional)';
             infoAdicional.classList.add('form-control', 'my-3', 'hidden');
             infoAdicional.id = 'infoAdicional';
             menu.appendChild(infoAdicional);
 
-            // Crear botón de enviar
             const enviarBtn = document.createElement('button');
             enviarBtn.textContent = 'Enviar';
             enviarBtn.classList.add('btn', 'btn-success', 'my-2', 'hidden');

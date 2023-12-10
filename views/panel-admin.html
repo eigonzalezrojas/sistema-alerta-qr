@@ -1,0 +1,115 @@
+<!-- https://themesberg.github.io/simple-bootstrap-5-dashboard/ -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/public/css/panel-admin.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light p-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Panel Administración</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutButton">Cerrar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#" id="linkAlertas">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Alertas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="linkUsuarios">
+                                <i class="bi bi-people-fill"></i> Usuarios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="linkUbicaciones">
+                                <i class="bi bi-building-fill"></i> Ubicaciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="linkQR">
+                                <i class="bi bi-qr-code"></i> QR
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
+                <!-- Contenido para Alertas -->
+                <div id="seccionAlertas" class="tabcontent">
+                    <h2>Alertas</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Estado Actual</th>
+                                <th>Fecha</th>
+                                <th>Cambiar Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAlertasBody">
+                            <!-- Las alertas se cargarán aquí -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+
+                <!-- Contenido para Usuarios -->
+                <div id="seccionUsuarios" class="tabcontent" style="display: none;">
+                    <h2>Usuarios</h2>
+                    <!-- Contenido específico para Usuarios -->
+                </div>
+
+                <!-- Contenido para Ubicaciones -->
+                <div id="seccionUbicaciones" class="tabcontent" style="display: none;">
+                    <h2>Ubicaciones</h2>
+                    <!-- Contenido específico para Ubicaciones -->
+                </div>
+
+                <!-- Contenido para QR -->
+                <div id="seccionQR" class="tabcontent" style="display: none;">
+                    <h2>QR</h2>
+                    <!-- Contenido específico para QR -->
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="/js/panel-admin.js"></script>
+    <!-- Github buttons -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
