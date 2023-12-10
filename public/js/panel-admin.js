@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // cargarAlertas();
-    // cargarUbicaciones();
     const seccionAlertas = document.getElementById('seccionAlertas');
     const seccionUsuarios = document.getElementById('seccionUsuarios');
     const seccionUbicaciones = document.getElementById('seccionUbicaciones');
@@ -92,7 +90,7 @@ function cargarUbicaciones() {
         .then(response => response.json())
         .then(ubicaciones => {
             const selectUbicacion = document.getElementById('selectUbicacion');
-            selectUbicacion.innerHTML = ''; // Limpia las opciones existentes
+            selectUbicacion.innerHTML = '';
             ubicaciones.forEach(ubicacion => {
                 let option = document.createElement('option');
                 option.value = ubicacion.id;
@@ -102,6 +100,7 @@ function cargarUbicaciones() {
         })
         .catch(error => console.error('Error al cargar ubicaciones:', error));
 }
+
 
 document.getElementById('btnGenerarQR').addEventListener('click', function() {
     const locationId = document.getElementById('selectUbicacion').value;
@@ -156,6 +155,7 @@ document.getElementById('btnImprimirQR').addEventListener('click', function() {
     }, 250);
 });
 
+
 document.getElementById('btnDescargarQR').addEventListener('click', function() {
     var qrImagen = document.getElementById('imagenParaImpresion').src; // Asume que tu QR está en este elemento
     var linkDescarga = document.createElement('a');
@@ -163,7 +163,6 @@ document.getElementById('btnDescargarQR').addEventListener('click', function() {
 
     linkDescarga.download = 'codigoQR.png'; 
 
-    // Simula un clic en el enlace para descargar la imagen
     document.body.appendChild(linkDescarga);
     linkDescarga.click();
     document.body.removeChild(linkDescarga);
@@ -187,3 +186,29 @@ function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+
+document.getElementById('logoutButton').addEventListener('click', function(event) {
+    event.preventDefault();
+
+    fetch('/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al cerrar sesión');
+        }
+        return response.text();
+    })
+    .then(() => {
+        window.location.href = '/'; // Redirigir a la página de inicio de sesión
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('Error al cerrar sesión');
+    });
+});
+

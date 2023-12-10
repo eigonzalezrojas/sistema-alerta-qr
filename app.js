@@ -37,68 +37,84 @@ app.use(session({
   secret: 'rutaie23#', 
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }));
 
 
 // start Cerrar sesion
 app.post('/logout', (req, res) => {
-  if (req.session) {
-      req.session.destroy((error) => {
-          if (error) {
-              return res.status(500).send('No se pudo cerrar la sesión');
-          }
-          res.send('Sesión cerrada');
-      });
-  } else {
-      res.status(400).send('Sesión no iniciada');
-  }
+    if (req.session) {
+        req.session.destroy((error) => {
+            if (error) {
+                return res.status(500).send('No se pudo cerrar la sesión');
+            }
+            res.send('Sesión cerrada');
+        });
+    } else {
+        res.status(400).send('Sesión no iniciada');
+    }
 });
 
 
-// Ruta principal que muestra el index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
-});
-
-
-// Ruta para la página de login
-app.get('/login', (req, res) => {
+// Ruta principal que muestra el login
+app.get('/', (req, res) => {    
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
-
-app.post('/login', (req, res) => {
+// Verificacion credenciales
+app.post('/', (req, res) => {
     const { rut, clave } = req.body;
     const query = 'SELECT * FROM Usuarios WHERE rut = ?';
   
     connection.query(query, [rut], async (error, results) => {
-      if (error) throw error;
-  
-      if (results.length === 0) {
-        return res.status(401).send('Usuario no encontrado.');
-      }
-  
-      const usuario = results[0];
-  
-      const claveValida = await bcrypt.compare(clave, usuario.clave);
-      
-      if (!claveValida) {
-        return res.status(401).send('Contraseña incorrecta.');
-      }
-  
-      // Redirige según el rol del usuario
-      switch (usuario.rol_id) {
-        case 1:
-          res.json({ success: true, redirectUrl: 'panel-admin.html' });
-          break;
-          default:
-          res.json({ success: true, redirectUrl: 'panel-user.html' });
-          break;
-      }
-    });
-  });
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).send('Error en el servidor');
+        }
+    
+        if (results.length === 0) {
+            return res.status(401).send('Usuario no encontrado.');
+        }
+    
+        const usuario = results[0];
+        const claveValida = await bcrypt.compare(clave, usuario.clave);
+        
+        if (!claveValida) {
+            return res.status(401).send('Contraseña incorrecta.');
+        }
+    
+        // Establecer la sesión del usuario aquí
+        req.session.usuario = { id: usuario.id, rol: usuario.rol_id };        
 
+
+        switch (usuario.rol_id) {
+            case 1:
+                res.json({ success: true, redirectUrl: '/panel-admin' });
+                break;
+            default:
+                res.json({ success: true, redirectUrl: 'panel-user.html' });
+                break;
+        }
+    });
+});
+
+// Middleware que verifica si el usuario está autenticado
+function verificarAutenticacion(req, res, next) {
+    if (req.session.usuario && req.session.usuario.rol === 1) {
+        next();
+    } else {
+        res.status(401).send('No autorizado');
+    }
+}
+
+// Middleware para proteger la ruta que sirve
+app.get('/panel-admin', verificarAutenticacion, (req, res) => {
+    res.sendFile(path.join(__dirname, 'private', 'panel-admin.html'));
+});
+
+app.get('/panel-user.html', verificarAutenticacion, (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'panel-user.html'));
+});
 
 // Función para obtener las alertas de la base de datos
 app.get('/api/tipoAlertas', (req, res) => {
@@ -118,8 +134,6 @@ app.get('/api/tipoAlertas', (req, res) => {
     });
 });
 
-
-
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;
 
@@ -132,11 +146,10 @@ app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     }
 });
 
-
+// Generar URL del QR
 app.get('/generateQR', (req, res) => {
-    const locationId = req.query.locationId;
-    // Suponiendo que generas el QR aquí...
-    QRCode.toDataURL(`https://eithelgonzalezrojas.cl/alertas?ubicacion=${locationId}`, (err, dataUrl) => {
+    const locationId = req.query.locationId;    
+    QRCode.toDataURL(`https://eithelgonzalezrojas.cl/menu.html?locationId=${locationId}`, (err, dataUrl) => {
         if (err) {
             res.status(500).json({ error: 'Error al generar el código QR' });
         } else {

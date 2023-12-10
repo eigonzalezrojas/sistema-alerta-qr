@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var usuario = document.getElementById('username').value;
         var clave = document.getElementById('password').value;
 
-        fetch('/login', {
+        fetch('/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
