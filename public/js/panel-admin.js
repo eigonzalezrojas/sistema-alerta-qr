@@ -3,11 +3,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const seccionUsuarios = document.getElementById('seccionUsuarios');
     const seccionUbicaciones = document.getElementById('seccionUbicaciones');
     const seccionQr = document.getElementById('seccionQR');
-
+    const seccionInstituciones = document.getElementById('seccionInstituciones');
 
 
     seccionAlertas.style.display = 'block';
     seccionUsuarios.style.display = 'none';
+    seccionInstituciones.style.display = 'none';
     seccionUbicaciones.style.display = 'none';
     seccionQr.style.display = 'none';
 
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         seccionAlertas.style.display = 'block';
         seccionUsuarios.style.display = 'none';
+        seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'none';
         cargarAlertas();
@@ -25,6 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         seccionAlertas.style.display = 'none';
         seccionUsuarios.style.display = 'block';
+        seccionInstituciones.style.display = 'none';
+        seccionUbicaciones.style.display = 'none';
+        seccionQr.style.display = 'none';
+        cargarUsuarios();
+    });
+
+    linkInstituciones.addEventListener('click', function (event) {
+        event.preventDefault();
+        seccionAlertas.style.display = 'none';
+        seccionUsuarios.style.display = 'none';
+        seccionInstituciones.style.display = 'block';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'none';
         
@@ -34,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         seccionAlertas.style.display = 'none';
         seccionUsuarios.style.display = 'none';
+        seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'block';
         seccionQr.style.display = 'none';
         
@@ -43,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         seccionAlertas.style.display = 'none';
         seccionUsuarios.style.display = 'none';
+        seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'block';
         cargarUbicaciones();
@@ -85,6 +100,46 @@ function cargarAlertas() {
 }
 
 
+function cargarUsuarios() {
+    fetch('/api/usuarios')
+    .then(response => response.json())
+    .then(usuarios => {
+        const tablaUsuariosBody = document.getElementById('tablaUsuariosBody');
+        tablaUsuariosBody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
+        usuarios.forEach(usuario => {
+            let fila = tablaUsuariosBody.insertRow();
+            fila.insertCell(0).textContent = usuario.nombre;
+            fila.insertCell(1).textContent = usuario.email;
+            fila.insertCell(2).textContent = usuario.rut;
+            fila.insertCell(3).textContent = usuario.rol;
+
+            // Celda para los botones de acción
+            let celdaAcciones = fila.insertCell(4);
+
+            // Botón de editar
+            let botonEditar = document.createElement("button");
+            botonEditar.textContent = "Editar";
+            botonEditar.classList.add("btn", "btn-warning");
+            botonEditar.onclick = function() {
+                editarUsuario(usuario.id); // Reemplazar con tu función de edición
+            };
+            celdaAcciones.appendChild(botonEditar);
+
+            // Botón de eliminar
+            let botonEliminar = document.createElement("button");
+            botonEliminar.textContent = "Eliminar";
+            botonEliminar.classList.add("btn", "btn-danger");
+            botonEliminar.onclick = function() {
+                eliminarUsuario(usuario.id); // Reemplazar con tu función de eliminación
+            };
+            celdaAcciones.appendChild(botonEliminar);
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
 function cargarUbicaciones() {
     fetch('/api/ubicaciones')
         .then(response => response.json())
@@ -99,6 +154,25 @@ function cargarUbicaciones() {
             });
         })
         .catch(error => console.error('Error al cargar ubicaciones:', error));
+}
+
+
+function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
+    // Enviar la solicitud al servidor para cambiar el estado
+    fetch('/api/cambiarEstadoAlerta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idAlerta, estadoId: nuevoEstadoId })
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Estado actualizado');
+            cargarAlertas(); // Recargar las alertas para reflejar el cambio
+        } else {
+            console.error('Error al actualizar el estado');
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
@@ -167,25 +241,6 @@ document.getElementById('btnDescargarQR').addEventListener('click', function() {
     linkDescarga.click();
     document.body.removeChild(linkDescarga);
 });
-
-
-function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
-    // Enviar la solicitud al servidor para cambiar el estado
-    fetch('/api/cambiarEstadoAlerta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: idAlerta, estadoId: nuevoEstadoId })
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Estado actualizado');
-            cargarAlertas(); // Recargar las alertas para reflejar el cambio
-        } else {
-            console.error('Error al actualizar el estado');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
 
 
 document.getElementById('logoutButton').addEventListener('click', function(event) {

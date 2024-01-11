@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql');
 const QRCode = require('qrcode');
+const cors = require('cors');
 
 require('dotenv').config();
 
@@ -11,6 +12,8 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json());
+
+app.use(cors());
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -133,6 +136,27 @@ app.get('/api/tipoAlertas', (req, res) => {
         res.json(results);
     });
 });
+
+
+app.get('/api/usuarios', (req, res) => {
+    const query = 'SELECT u.nombre, u.email, r.nombre as rol, u.rut '+
+    'FROM Usuarios u '+
+    'JOIN Roles r ON u.rol_id = r.id';
+
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener las usuarios' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron usuarios' });
+        }
+
+        res.json(results);
+    });
+});
+
 
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;

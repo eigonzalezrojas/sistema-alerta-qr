@@ -1,6 +1,7 @@
 <!-- https://themesberg.github.io/simple-bootstrap-5-dashboard/ -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,25 +11,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/public/css/panel-admin.css">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light p-3">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Panel Administración</a>
-            <button class="navbar-toggler" type="button" 
-                    data-bs-toggle="collapse" data-bs-target="#sidebar" 
-                    aria-controls="sidebar" aria-expanded="false" 
-                    aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar"
+                aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">                        
+                    <li class="nav-item">
                         <button class="btn btn-danger" id="logoutButton">Cerrar Sesión</button>
                     </li>
                 </ul>
             </div>
-            
+
         </div>
     </nav>
 
@@ -50,8 +50,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="#" id="linkInstituciones">
+                                <i class="bi bi-building-fill"></i> Instituciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="#" id="linkUbicaciones">
-                                <i class="bi bi-building-fill"></i> Ubicaciones
+                                <i class="bi bi-crosshair2"></i> Ubicaciones
                             </a>
                         </li>
                         <li class="nav-item">
@@ -87,15 +92,32 @@
                 <!-- Contenido para Usuarios -->
                 <div id="seccionUsuarios" class="tabcontent" style="display: none;">
                     <h2>Usuarios</h2>
-                    <!-- Contenido específico para Usuarios -->
+                    <button id="btnCrearUsuario" class="btn btn-primary">Crear</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rut</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosBody">
+                            <!-- Los usuarios se cargarán aquí -->
+                        </tbody>
+                    </table>
                 </div>
-
+                <!-- Contenido para Instituciones -->
+                <div id="seccionInstituciones" class="tabcontent" style="display: none;">
+                    <h2>Instituciones</h2>
+                    <!-- Contenido específico para Instituciones -->
+                </div>
                 <!-- Contenido para Ubicaciones -->
                 <div id="seccionUbicaciones" class="tabcontent" style="display: none;">
                     <h2>Ubicaciones</h2>
                     <!-- Contenido específico para Ubicaciones -->
                 </div>
-
                 <!-- Contenido para QR -->
                 <div id="seccionQR" class="tabcontent" style="display: none;">
                     <h2>QR</h2>
@@ -105,25 +127,30 @@
                     </select>
                     <!-- Botón para generar el código QR -->
                     <button id="btnGenerarQR" class="btn btn-primary">Generar QR</button>
-                
+
                     <!-- Contenedor para mostrar el QR generado -->
                     <div id="contenedorQR"></div>
-                
+
                     <!-- Contenedor oculto para impresión -->
                     <div id="contenedorImpresionQR" style="display: none;">
                         <img id="imagenParaImpresion" src="">
                     </div>
                     <div class="d-flex justify-content-start">
-                        <button id="btnImprimirQR" class="btn btn-warning me-2" style="display:none;">Imprimir QR</button>
+                        <button id="btnImprimirQR" class="btn btn-warning me-2" style="display:none;">Imprimir
+                            QR</button>
                         <button id="btnDescargarQR" class="btn btn-success" style="display:none;">Descargar QR</button>
-                    </div>                    
+                    </div>
                 </div>
-                
+
             </main>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="/js/panel-admin.js"></script>
     <!-- Github buttons -->
@@ -131,4 +158,5 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
