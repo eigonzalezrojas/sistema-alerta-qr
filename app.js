@@ -64,6 +64,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
+
 // Verificacion credenciales
 app.post('/', (req, res) => {
     const { rut, clave } = req.body;
@@ -101,6 +102,7 @@ app.post('/', (req, res) => {
     });
 });
 
+
 // Middleware que verifica si el usuario está autenticado
 function verificarAutenticacion(req, res, next) {
     if (req.session.usuario && req.session.usuario.rol === 1) {
@@ -110,14 +112,17 @@ function verificarAutenticacion(req, res, next) {
     }
 }
 
+
 // Middleware para proteger la ruta que sirve
 app.get('/panel-admin', verificarAutenticacion, (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'panel-admin.html'));
 });
 
+
 app.get('/panel-user.html', verificarAutenticacion, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'panel-user.html'));
 });
+
 
 // Función para obtener las alertas de la base de datos
 app.get('/api/tipoAlertas', (req, res) => {
@@ -139,9 +144,10 @@ app.get('/api/tipoAlertas', (req, res) => {
 
 
 app.get('/api/usuarios', (req, res) => {
-    const query = 'SELECT u.nombre, u.email, r.nombre as rol, u.rut '+
+    const query = 'SELECT u.nombre, u.email, r.nombre as rol, u.rut, i.nombre '+
     'FROM Usuarios u '+
-    'JOIN Roles r ON u.rol_id = r.id';
+    'JOIN Roles r ON u.rol_id = r.id'
+    'JOIN Institucion i ON u.institucion_id = i.id';
 
     connection.query(query, (error, results) => {
         if (error) {
@@ -157,6 +163,39 @@ app.get('/api/usuarios', (req, res) => {
     });
 });
 
+
+app.get('/api/instituciones', (req, res) => {
+    connection.query('SELECT * FROM Institucion', (err, results) => {
+      if (err) {
+        // Si hay un error, envía una respuesta de error
+        console.error('Error al consultar las instituciones:', err);
+        res.status(500).json({ message: 'Error al obtener las instituciones' });
+        return;
+      }
+  
+      // Envía los resultados de la consulta como respuesta JSON
+      res.json(results);
+    });
+});
+  
+
+
+app.post('/crear-institucion', (req, res) => {
+    const { nombre, detalle } = req.body;
+  
+    const query = 'INSERT INTO Institucion (nombre, descripcion) VALUES (?, ?)';
+    connection.query(query, [nombre, detalle], (err, results) => {
+      if (err) {
+        console.error('Error al insertar en la base de datos:', err);
+        res.status(500).json({ message: 'Error al crear la institución' });
+        return;
+      }
+  
+      console.log(`Nombre: ${nombre}, Detalle: ${detalle}`);
+      res.json({ message: 'Institución creada con éxito', id: results.insertId });
+    });
+});
+  
 
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;
@@ -200,7 +239,6 @@ app.get('/api/ubicaciones', (req, res) => {
         res.json(results);
     });
 });
-
 
 
 const PORT = process.env.PORT || 3000;

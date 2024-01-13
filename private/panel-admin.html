@@ -100,6 +100,7 @@
                                 <th>Email</th>
                                 <th>Rut</th>
                                 <th>Rol</th>
+                                <th>Institución</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -111,7 +112,19 @@
                 <!-- Contenido para Instituciones -->
                 <div id="seccionInstituciones" class="tabcontent" style="display: none;">
                     <h2>Instituciones</h2>
-                    <!-- Contenido específico para Instituciones -->
+                    <button id="btnCrearInstitucion" class="btn btn-primary">Crear</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripcion</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaInstitucionesBody">
+                            <!-- Las Instituciones se cargarán aquí -->
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Contenido para Ubicaciones -->
                 <div id="seccionUbicaciones" class="tabcontent" style="display: none;">
@@ -142,21 +155,78 @@
                     </div>
                 </div>
 
+
+                <!-- Modal para Crear Usuarios -->
+                <div class="modal fade" id="modalCrearUsuario" tabindex="-1" role="dialog"
+                    aria-labelledby="modalCrearUsuarioLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalCrearUsuarioLabel">Crear Nuevo Usuario</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formCrearUsuario">
+                                    <div class="form-group">
+                                        <label for="nombreUsuario">Nombre</label>
+                                        <input type="text" class="form-control" id="nombreUsuario" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emailUsuario">Email</label>
+                                        <input type="text" class="form-control" id="emailUsuario" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emailUsuario">Rut</label>
+                                        <input type="text" class="form-control" id="rutUsuario" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emailUsuario">Rol</label>
+                                        <input type="text" class="form-control" id="rolUsuario" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para Crear Institución -->
+                <div class="modal fade" id="modalCrearInstitucion" tabindex="-1" role="dialog"
+                    aria-labelledby="modalCrearInstitucionLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalCrearInstitucionLabel">Crear Nueva Institución</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formCrearInstitucion">
+                                    <div class="form-group">
+                                        <label for="nombreInstitucion">Nombre</label>
+                                        <input type="text" class="form-control" id="nombreInstitucion" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detalleInstitucion">Detalle</label>
+                                        <textarea class="form-control" id="detalleInstitucion" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
-        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
-        crossorigin="anonymous"></script>
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="/js/panel-admin.js"></script>
-    <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

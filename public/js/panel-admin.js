@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         seccionInstituciones.style.display = 'block';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'none';
+        cargarInstituciones();
         
     });
 
@@ -113,9 +114,10 @@ function cargarUsuarios() {
             fila.insertCell(1).textContent = usuario.email;
             fila.insertCell(2).textContent = usuario.rut;
             fila.insertCell(3).textContent = usuario.rol;
+            fila.insertCell(4).textContent = usuario.institucion;
 
             // Celda para los botones de acción
-            let celdaAcciones = fila.insertCell(4);
+            let celdaAcciones = fila.insertCell(5);
 
             // Botón de editar
             let botonEditar = document.createElement("button");
@@ -132,6 +134,44 @@ function cargarUsuarios() {
             botonEliminar.classList.add("btn", "btn-danger");
             botonEliminar.onclick = function() {
                 eliminarUsuario(usuario.id); // Reemplazar con tu función de eliminación
+            };
+            celdaAcciones.appendChild(botonEliminar);
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+function cargarInstituciones() {
+    fetch('/api/instituciones')
+    .then(response => response.json())
+    .then(instituciones => {
+        const tablaInstitucionesBody = document.getElementById('tablaInstitucionesBody');
+        tablaInstitucionesBody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
+        instituciones.forEach(institucion => {
+            let fila = tablaInstitucionesBody.insertRow();
+            fila.insertCell(0).textContent = institucion.nombre;
+            fila.insertCell(1).textContent = institucion.descripcion;
+
+            // Celda para los botones de acción
+            let celdaAcciones = fila.insertCell(2);
+
+            // Botón de editar
+            let botonEditar = document.createElement("button");
+            botonEditar.textContent = "Editar";
+            botonEditar.classList.add("btn", "btn-warning");
+            botonEditar.onclick = function() {
+                editarInstitucion(institucion.id); // Reemplazar con tu función de edición
+            };
+            celdaAcciones.appendChild(botonEditar);
+
+            // Botón de eliminar
+            let botonEliminar = document.createElement("button");
+            botonEliminar.textContent = "Eliminar";
+            botonEliminar.classList.add("btn", "btn-danger");
+            botonEliminar.onclick = function() {
+                eliminarInstitucion(institucion.id); // Reemplazar con tu función de eliminación
             };
             celdaAcciones.appendChild(botonEliminar);
         });
@@ -267,3 +307,55 @@ document.getElementById('logoutButton').addEventListener('click', function(event
     });
 });
 
+  
+  
+
+var myModal = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
+
+
+var myModal = new bootstrap.Modal(document.getElementById('modalCrearInstitucion'));
+
+document.getElementById('btnCrearInstitucion').addEventListener('click', function() {
+    myModal.show();
+});
+  
+
+document.getElementById('formCrearInstitucion').addEventListener('submit', function(e) {
+    e.preventDefault();
+  
+    var nombre = document.getElementById('nombreInstitucion').value;
+    var detalle = document.getElementById('detalleInstitucion').value;
+  
+    fetch('/crear-institucion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nombre: nombre, detalle: detalle })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Muestra un mensaje de éxito con SweetAlert
+      Swal.fire({
+        title: '¡Éxito!',
+        text: data.message, // Mensaje de éxito desde el servidor
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        myModal.hide();
+      });
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+  
+      // Muestra un mensaje de error con SweetAlert
+      Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al crear la institución.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        myModal.hide();
+      });
+    });
+});
