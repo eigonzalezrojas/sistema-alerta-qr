@@ -169,20 +169,27 @@
                             <div class="modal-body">
                                 <form id="formCrearUsuario">
                                     <div class="form-group">
+                                        <label for="emailUsuario">Rut</label>
+                                        <input type="text" class="form-control" id="rutUsuario" placeholder="12345678-9"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="nombreUsuario">Nombre</label>
-                                        <input type="text" class="form-control" id="nombreUsuario" required>
+                                        <input type="text" class="form-control" id="nombreUsuario"
+                                            placeholder="Juan Pérez" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="emailUsuario">Email</label>
-                                        <input type="text" class="form-control" id="emailUsuario" required>
+                                        <input type="text" class="form-control" id="emailUsuario"
+                                            placeholder="juan.perez@example.com" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="emailUsuario">Rut</label>
-                                        <input type="text" class="form-control" id="rutUsuario" required>
+                                        <label for="rolUsuario">Rol</label>
+                                        <select class="form-control" id="rolUsuario" required></select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="emailUsuario">Rol</label>
-                                        <input type="text" class="form-control" id="rolUsuario" required>
+                                        <label for="institucionUsuario">Institucion</label>
+                                        <select class="form-control" id="institucionUsuario" required></select>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Guardar</button>
                                 </form>

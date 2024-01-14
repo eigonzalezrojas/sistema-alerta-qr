@@ -1,3 +1,5 @@
+const { log } = require("console");
+
 document.addEventListener('DOMContentLoaded', function() {
     const seccionAlertas = document.getElementById('seccionAlertas');
     const seccionUsuarios = document.getElementById('seccionUsuarios');
@@ -100,13 +102,12 @@ function cargarAlertas() {
     .catch(error => console.error('Error:', error));
 }
 
-
 function cargarUsuarios() {
     fetch('/api/usuarios')
     .then(response => response.json())
-    .then(usuarios => {
+    .then(usuarios => {        
         const tablaUsuariosBody = document.getElementById('tablaUsuariosBody');
-        tablaUsuariosBody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+        tablaUsuariosBody.innerHTML = '';
 
         usuarios.forEach(usuario => {
             let fila = tablaUsuariosBody.insertRow();
@@ -141,10 +142,14 @@ function cargarUsuarios() {
     .catch(error => console.error('Error:', error));
 }
 
-
 function cargarInstituciones() {
     fetch('/api/instituciones')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor: ' + response.statusText);
+        }
+        return response.json();
+    })
     .then(instituciones => {
         const tablaInstitucionesBody = document.getElementById('tablaInstitucionesBody');
         tablaInstitucionesBody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
@@ -176,9 +181,16 @@ function cargarInstituciones() {
             celdaAcciones.appendChild(botonEliminar);
         });
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al cargar las instituciones. Por favor, intente de nuevo.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        });
+    });
 }
-
 
 function cargarUbicaciones() {
     fetch('/api/ubicaciones')
@@ -196,7 +208,6 @@ function cargarUbicaciones() {
         .catch(error => console.error('Error al cargar ubicaciones:', error));
 }
 
-
 function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
     // Enviar la solicitud al servidor para cambiar el estado
     fetch('/api/cambiarEstadoAlerta', {
@@ -213,6 +224,58 @@ function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
         }
     })
     .catch(error => console.error('Error:', error));
+}
+
+function cargarRolesForm() {
+    fetch('/api/roles')
+        .then(response => response.json())
+        .then(roles => {
+            const selectRol = document.getElementById('rolUsuario');
+            selectRol.innerHTML = '<option disabled selected>Seleccione un rol</option>'; // Opción predeterminada
+            selectRol.innerHTML += roles.map(rol => `<option value="${rol.id}">${rol.nombre}</option>`).join('');
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function cargarInstitucionesForm() {
+    fetch('/api/instituciones')
+        .then(response => response.json())
+        .then(instituciones => {
+            const selectInstitucion = document.getElementById('institucionUsuario');
+            selectInstitucion.innerHTML = '<option disabled selected>Seleccione una institución</option>'; // Opción predeterminada
+            selectInstitucion.innerHTML += instituciones.map(institucion => `<option value="${institucion.id}">${institucion.nombre}</option>`).join('');
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function validarRut(rut) {
+    // Limpiar el RUT dejando solo números y el dígito verificador
+    var valor = rut.replace(/[\.\-]/g, '');
+    
+    // Dividir el RUT en dígito verificador y el resto
+    var cuerpo = valor.slice(0, -1);
+    var dv = valor.slice(-1).toUpperCase();
+
+    // Calcular el dígito verificador
+    var suma = 0;
+    var multiplo = 2;
+
+    for(var i = 1; i <= cuerpo.length; i++) {
+        var index = multiplo * valor.charAt(cuerpo.length - i);
+        suma += index;
+        if (multiplo < 7) {
+            multiplo += 1;
+        } else {
+            multiplo = 2;
+        }
+    }
+
+    var dvEsperado = 11 - (suma % 11);
+    dv = (dv == 'K') ? 10 : dv;
+    dv = (dv == 0) ? 11 : dv;
+
+    // Retornar si el dígito verificador coincide
+    return dvEsperado == dv;
 }
 
 
@@ -256,7 +319,6 @@ document.getElementById('btnGenerarQR').addEventListener('click', function() {
         });
 });
 
-
 document.getElementById('btnImprimirQR').addEventListener('click', function() {
     var contenido = document.getElementById('contenedorImpresionQR').innerHTML;
     var ventanaImpresion = window.open('', '_blank');
@@ -269,7 +331,6 @@ document.getElementById('btnImprimirQR').addEventListener('click', function() {
     }, 250);
 });
 
-
 document.getElementById('btnDescargarQR').addEventListener('click', function() {
     var qrImagen = document.getElementById('imagenParaImpresion').src; // Asume que tu QR está en este elemento
     var linkDescarga = document.createElement('a');
@@ -281,7 +342,6 @@ document.getElementById('btnDescargarQR').addEventListener('click', function() {
     linkDescarga.click();
     document.body.removeChild(linkDescarga);
 });
-
 
 document.getElementById('logoutButton').addEventListener('click', function(event) {
     event.preventDefault();
@@ -307,18 +367,72 @@ document.getElementById('logoutButton').addEventListener('click', function(event
     });
 });
 
-  
-  
-
-var myModal = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
-
-
-var myModal = new bootstrap.Modal(document.getElementById('modalCrearInstitucion'));
-
-document.getElementById('btnCrearInstitucion').addEventListener('click', function() {
-    myModal.show();
+var modalUsuarios = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
+document.getElementById('btnCrearUsuario').addEventListener('click', function() {
+    cargarRolesForm();
+    cargarInstitucionesForm();
+    modalUsuarios.show();
 });
-  
+
+document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var rut = document.getElementById('rutUsuario').value;
+    var nombre = document.getElementById('nombreUsuario').value;
+    var email = document.getElementById('emailUsuario').value;
+    var rolId = document.getElementById('rolUsuario').value;
+    var institucionId = document.getElementById('institucionUsuario').value;    
+
+    if (!validarRut(rut)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'El RUT ingresado no es válido.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        });
+        return;
+    }
+
+    fetch('/crear-usuario', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rut: rut, nombre: nombre, email: email, rolId: rolId, institucionId: institucionId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        Swal.fire({
+            title: '¡Éxito!',
+            text: 'Usuario creado con éxito.',
+            icon: 'success',
+            confirmButtonText: 'Cerrar'
+        }).then(() => {
+            cargarUsuarios();
+        });
+        modalUsuarios.hide();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al crear el usuario.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        });
+    });
+});
+
+
+var modalInsitucion = new bootstrap.Modal(document.getElementById('modalCrearInstitucion'));
+document.getElementById('btnCrearInstitucion').addEventListener('click', function() {
+    modalInsitucion.show();
+});
 
 document.getElementById('formCrearInstitucion').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -342,8 +456,9 @@ document.getElementById('formCrearInstitucion').addEventListener('submit', funct
         icon: 'success',
         confirmButtonText: 'OK'
       }).then(() => {
-        myModal.hide();
+        cargarInstituciones();
       });
+      modalInsitucion.hide();
     })
     .catch((error) => {
       console.error('Error:', error);
@@ -355,7 +470,8 @@ document.getElementById('formCrearInstitucion').addEventListener('submit', funct
         icon: 'error',
         confirmButtonText: 'OK'
       }).then(() => {
-        myModal.hide();
+        cargarInstituciones();
       });
+      modalInsitucion.hide();
     });
 });

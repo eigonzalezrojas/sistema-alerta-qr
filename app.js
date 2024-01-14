@@ -118,13 +118,10 @@ app.get('/panel-admin', verificarAutenticacion, (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'panel-admin.html'));
 });
 
-
 app.get('/panel-user.html', verificarAutenticacion, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'panel-user.html'));
 });
 
-
-// Función para obtener las alertas de la base de datos
 app.get('/api/tipoAlertas', (req, res) => {
     const query = 'SELECT id, nombre FROM TiposAlerta';
 
@@ -142,11 +139,10 @@ app.get('/api/tipoAlertas', (req, res) => {
     });
 });
 
-
 app.get('/api/usuarios', (req, res) => {
-    const query = 'SELECT u.nombre, u.email, r.nombre as rol, u.rut, i.nombre '+
+    const query = 'SELECT u.nombre, u.email, r.nombre as rol, u.rut, i.nombre as institucion '+
     'FROM Usuarios u '+
-    'JOIN Roles r ON u.rol_id = r.id'
+    'JOIN Roles r ON u.rol_id = r.id '+
     'JOIN Institucion i ON u.institucion_id = i.id';
 
     connection.query(query, (error, results) => {
@@ -163,22 +159,54 @@ app.get('/api/usuarios', (req, res) => {
     });
 });
 
+app.post('/crear-usuario', (req, res) => {
+    const { rut, nombre, email, rolId, institucionId } = req.body;
 
-app.get('/api/instituciones', (req, res) => {
-    connection.query('SELECT * FROM Institucion', (err, results) => {
-      if (err) {
-        // Si hay un error, envía una respuesta de error
-        console.error('Error al consultar las instituciones:', err);
-        res.status(500).json({ message: 'Error al obtener las instituciones' });
-        return;
-      }
-  
-      // Envía los resultados de la consulta como respuesta JSON
-      res.json(results);
+    // Generar la clave a partir del rut, quitando los dos últimos caracteres
+    const claveGenerada = rut.slice(0, -2);
+
+    // Cifrar la clave antes de guardarla en la base de datos
+    bcrypt.hash(claveGenerada, 10, function(err, hash) {
+        if (err) {
+            console.error('Error al cifrar la clave:', err);
+            return res.status(500).json({ mensaje: 'Error al crear el usuario' });
+        }
+
+        // Insertar el usuario en la base de datos
+        const query = 'INSERT INTO Usuarios (nombre, email, rol_id, rut, clave, institucion_id) VALUES (?, ?, ?, ?, ?, ?)';
+        connection.query(query, [nombre, email, rolId, rut, hash, institucionId], (error, results) => {
+            if (error) {
+                console.error('Error al insertar en la base de datos:', error);
+                return res.status(500).json({ mensaje: 'Error al crear el usuario' });
+            }
+
+            console.log(`Usuario creado con éxito. ID: ${results.insertId}`);
+            res.json({ mensaje: 'Usuario creado con éxito', id: results.insertId });
+        });
     });
 });
-  
 
+app.get('/api/roles', (req, res) => {
+    const query = 'SELECT * FROM Roles';
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener los roles' });
+        }
+        res.json(results);
+    });
+});
+
+app.get('/api/instituciones', (req, res) => {
+    const query = 'SELECT * FROM Institucion';
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener las instituciones' });
+        }
+        res.json(results);
+    });
+});
 
 app.post('/crear-institucion', (req, res) => {
     const { nombre, detalle } = req.body;
@@ -194,8 +222,7 @@ app.post('/crear-institucion', (req, res) => {
       console.log(`Nombre: ${nombre}, Detalle: ${detalle}`);
       res.json({ message: 'Institución creada con éxito', id: results.insertId });
     });
-});
-  
+}); 
 
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;
@@ -209,7 +236,6 @@ app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     }
 });
 
-// Generar URL del QR
 app.get('/generateQR', (req, res) => {
     const locationId = req.query.locationId;
     const qrUrl = `https://eithelgonzalezrojas.cl/menu.html?locationId=${locationId}`;    
@@ -221,7 +247,6 @@ app.get('/generateQR', (req, res) => {
         }
     });
 });
-
 
 app.get('/api/ubicaciones', (req, res) => {
     const query = 'SELECT id, nombre FROM Ubicaciones';
