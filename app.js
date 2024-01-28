@@ -224,6 +224,24 @@ app.post('/crear-institucion', (req, res) => {
     });
 }); 
 
+app.get('/api/ubicaciones', (req, res) => {
+    const query = 'SELECT u.nombre as nombre, u.descripcion as descripcion, i.nombre as institucion '+
+    'FROM Ubicaciones u '+
+    'JOIN Institucion i ON i.id = u.institucion_id';
+
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al obtener las ubicaciones' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron ubicaciones' });
+        }
+        res.json(results);
+    });
+});
+
 app.post('/api/cambiarEstadoAlerta', async (req, res) => {
     const { id, estadoId } = req.body;
 
@@ -248,22 +266,22 @@ app.get('/generateQR', (req, res) => {
     });
 });
 
-app.get('/api/ubicaciones', (req, res) => {
-    const query = 'SELECT id, nombre FROM Ubicaciones';
+// app.get('/api/ubicaciones', (req, res) => {
+//     const query = 'SELECT id, nombre FROM Ubicaciones';
 
-    connection.query(query, (error, results) => {
-        if (error) {
-            console.error('Error en la consulta:', error);
-            return res.status(500).json({ mensaje: 'Error al obtener las ubicaciones' });
-        }
+//     connection.query(query, (error, results) => {
+//         if (error) {
+//             console.error('Error en la consulta:', error);
+//             return res.status(500).json({ mensaje: 'Error al obtener las ubicaciones' });
+//         }
 
-        if (results.length === 0) {
-            return res.status(404).json({ mensaje: 'No se encontraron ubicaciones' });
-        }
+//         if (results.length === 0) {
+//             return res.status(404).json({ mensaje: 'No se encontraron ubicaciones' });
+//         }
 
-        res.json(results);
-    });
-});
+//         res.json(results);
+//     });
+// });
 
 
 const PORT = process.env.PORT || 3000;

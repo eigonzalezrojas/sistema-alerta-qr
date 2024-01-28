@@ -1,5 +1,3 @@
-const { log } = require("console");
-
 document.addEventListener('DOMContentLoaded', function() {
     const seccionAlertas = document.getElementById('seccionAlertas');
     const seccionUsuarios = document.getElementById('seccionUsuarios');
@@ -53,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'block';
         seccionQr.style.display = 'none';
+        cargarUbicacionesTabla();
         
     });
 
@@ -192,21 +191,82 @@ function cargarInstituciones() {
     });
 }
 
-function cargarUbicaciones() {
+function cargarUbicacionesTabla() {
     fetch('/api/ubicaciones')
-        .then(response => response.json())
-        .then(ubicaciones => {
-            const selectUbicacion = document.getElementById('selectUbicacion');
-            selectUbicacion.innerHTML = '';
-            ubicaciones.forEach(ubicacion => {
-                let option = document.createElement('option');
-                option.value = ubicacion.id;
-                option.textContent = ubicacion.nombre;
-                selectUbicacion.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar ubicaciones:', error));
+    .then(response => {        
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor: ' + response.statusText);
+        }
+        return response.json();        
+    })
+    .then(ubicaciones => {
+        const tablaUbicacionesBody = document.getElementById('tablaUbicacionesBody');
+
+        // Verifica si el elemento existe y es visible
+        if (!tablaUbicacionesBody || tablaUbicacionesBody.offsetParent === null) {
+            console.error('Elemento tablaUbicacionesBody no encontrado o no visible');
+            return;
+        }
+
+        tablaUbicacionesBody.innerHTML = '';
+
+        ubicaciones.forEach(ubicacion => {
+            let fila = tablaUbicacionesBody.insertRow();
+
+            fila.insertCell(0).textContent = ubicacion.nombre;
+            fila.insertCell(1).textContent = ubicacion.descripcion;
+            fila.insertCell(2).textContent = ubicacion.institucion;
+
+            // Celda para los botones de acción
+            let celdaAcciones = fila.insertCell(3);
+
+            // Botón de editar
+            let botonEditar = document.createElement("button");
+            botonEditar.textContent = "Editar";
+            botonEditar.classList.add("btn", "btn-warning");
+            botonEditar.onclick = function() {
+                editarUbicacion(ubicacion.id); // Asegúrate de que esta función esté definida
+            };
+            celdaAcciones.appendChild(botonEditar);
+
+            // Botón de eliminar
+            let botonEliminar = document.createElement("button");
+            botonEliminar.textContent = "Eliminar";
+            botonEliminar.classList.add("btn", "btn-danger");
+            botonEliminar.onclick = function() {
+                eliminarubicacion(ubicacion.id); // Asegúrate de que esta función esté definida
+            };
+            celdaAcciones.appendChild(botonEliminar);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al cargar las ubicaciones. Por favor, intente de nuevo.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        });
+    });
 }
+
+
+
+// function cargarUbicaciones() {
+//     fetch('/api/ubicaciones')
+//         .then(response => response.json())
+//         .then(ubicaciones => {
+//             const selectUbicacion = document.getElementById('selectUbicacion');
+//             selectUbicacion.innerHTML = '';
+//             ubicaciones.forEach(ubicacion => {
+//                 let option = document.createElement('option');
+//                 option.value = ubicacion.id;
+//                 option.textContent = ubicacion.nombre;
+//                 selectUbicacion.appendChild(option);
+//             });
+//         })
+//         .catch(error => console.error('Error al cargar ubicaciones:', error));
+// }
 
 function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
     // Enviar la solicitud al servidor para cambiar el estado
@@ -381,7 +441,13 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     var nombre = document.getElementById('nombreUsuario').value;
     var email = document.getElementById('emailUsuario').value;
     var rolId = document.getElementById('rolUsuario').value;
-    var institucionId = document.getElementById('institucionUsuario').value;    
+    var institucionId = document.getElementById('institucionUsuario').value;
+    
+    console.log("Valor de rut:", rut);
+    console.log("Valor de nombre:", nombre);
+    console.log("Valor de email:", email);
+    console.log("Valor de rolId:", rolId);
+    console.log("Valor de institucionId:", institucionId);
 
     if (!validarRut(rut)) {
         Swal.fire({
