@@ -133,8 +133,8 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Descripcion</th>
+                                <th>Lugar</th>
+                                <th>Sector</th>
                                 <th>Institucion</th>
                                 <th>Acciones</th>
                             </tr>
@@ -230,6 +230,39 @@
                                     <div class="form-group">
                                         <label for="detalleInstitucion">Detalle</label>
                                         <textarea class="form-control" id="detalleInstitucion" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para Crear Ubicaciones -->
+                <div class="modal fade" id="modalCrearUbicacion" tabindex="-1" role="dialog"
+                    aria-labelledby="modalCrearUbicacionLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalCrearUbicacionLabel">Crear Nueva Ubicacion</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formCrearUbicacion">
+                                    <div class="form-group">
+                                        <label for="nombreUbicacion">Lugar</label>
+                                        <input type="text" class="form-control" id="nombreUbicacion"
+                                            placeholder="Sala 01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nombreSector">Sector</label>
+                                        <input type="text" class="form-control" id="nombreSector"
+                                            placeholder="Edificio A" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="institucionUbicacion">Institucion</label>
+                                        <select class="form-control" id="institucionUbicacion" required></select>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Guardar</button>
                                 </form>

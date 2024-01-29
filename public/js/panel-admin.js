@@ -202,12 +202,6 @@ function cargarUbicacionesTabla() {
     .then(ubicaciones => {
         const tablaUbicacionesBody = document.getElementById('tablaUbicacionesBody');
 
-        // Verifica si el elemento existe y es visible
-        if (!tablaUbicacionesBody || tablaUbicacionesBody.offsetParent === null) {
-            console.error('Elemento tablaUbicacionesBody no encontrado o no visible');
-            return;
-        }
-
         tablaUbicacionesBody.innerHTML = '';
 
         ubicaciones.forEach(ubicacion => {
@@ -297,11 +291,11 @@ function cargarRolesForm() {
         .catch(error => console.error('Error:', error));
 }
 
-function cargarInstitucionesForm() {
+function cargarInstitucionesForm(formulario) {
     fetch('/api/instituciones')
         .then(response => response.json())
         .then(instituciones => {
-            const selectInstitucion = document.getElementById('institucionUsuario');
+            const selectInstitucion = document.getElementById(formulario);
             selectInstitucion.innerHTML = '<option disabled selected>Seleccione una institución</option>'; // Opción predeterminada
             selectInstitucion.innerHTML += instituciones.map(institucion => `<option value="${institucion.id}">${institucion.nombre}</option>`).join('');
         })
@@ -430,7 +424,7 @@ document.getElementById('logoutButton').addEventListener('click', function(event
 var modalUsuarios = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
 document.getElementById('btnCrearUsuario').addEventListener('click', function() {
     cargarRolesForm();
-    cargarInstitucionesForm();
+    cargarInstitucionesForm('institucionUsuario');
     modalUsuarios.show();
 });
 
@@ -494,7 +488,6 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     });
 });
 
-
 var modalInsitucion = new bootstrap.Modal(document.getElementById('modalCrearInstitucion'));
 document.getElementById('btnCrearInstitucion').addEventListener('click', function() {
     modalInsitucion.show();
@@ -540,4 +533,10 @@ document.getElementById('formCrearInstitucion').addEventListener('submit', funct
       });
       modalInsitucion.hide();
     });
+});
+
+var modalUbicacion = new bootstrap.Modal(document.getElementById('modalCrearUbicacion'));
+document.getElementById('btnCrearUbicacion').addEventListener('click', function() {
+    cargarInstitucionesForm('institucionUbicacion');
+    modalUbicacion.show();
 });
