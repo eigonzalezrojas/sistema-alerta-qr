@@ -147,10 +147,11 @@
                 <!-- Contenido para QR -->
                 <div id="seccionQR" class="tabcontent" style="display: none;">
                     <h2>QR</h2>
+                    <label for="selectInstitucion">Seleccione una Institucion:</label>
+                    <select id="selectInstitucion" class="form-select"></select>
+
                     <label for="selectUbicacion">Seleccione una Ubicación:</label>
-                    <select id="selectUbicacion" class="form-select">
-                        <!-- Las opciones se cargarán dinámicamente -->
-                    </select>
+                    <select id="selectUbicacion" class="form-select"></select>
                     <!-- Botón para generar el código QR -->
                     <button id="btnGenerarQR" class="btn btn-primary">Generar QR</button>
 
@@ -164,7 +165,8 @@
                     <div class="d-flex justify-content-start">
                         <button id="btnImprimirQR" class="btn btn-warning me-2" style="display:none;">Imprimir
                             QR</button>
-                        <button id="btnDescargarQR" class="btn btn-success" style="display:none;">Descargar QR</button>
+                        <button id="btnDescargarQR" class="btn btn-success" style="display:none;">Descargar
+                            QR</button>
                     </div>
                 </div>
 

@@ -34,7 +34,6 @@ connection.connect(error => {
 });
 
 
-
 //Control de sesion navegador web - cookies
 app.use(session({
   secret: 'rutaie23#', 
@@ -42,7 +41,6 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }));
-
 
 // start Cerrar sesion
 app.post('/logout', (req, res) => {
@@ -58,12 +56,10 @@ app.post('/logout', (req, res) => {
     }
 });
 
-
 // Ruta principal que muestra el login
 app.get('/', (req, res) => {    
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
-
 
 // Verificacion credenciales
 app.post('/', (req, res) => {
@@ -102,7 +98,6 @@ app.post('/', (req, res) => {
     });
 });
 
-
 // Middleware que verifica si el usuario está autenticado
 function verificarAutenticacion(req, res, next) {
     if (req.session.usuario && req.session.usuario.rol === 1) {
@@ -111,7 +106,6 @@ function verificarAutenticacion(req, res, next) {
         res.status(401).send('No autorizado');
     }
 }
-
 
 // Middleware para proteger la ruta que sirve
 app.get('/panel-admin', verificarAutenticacion, (req, res) => {
@@ -217,9 +211,7 @@ app.post('/crear-institucion', (req, res) => {
         console.error('Error al insertar en la base de datos:', err);
         res.status(500).json({ message: 'Error al crear la institución' });
         return;
-      }
-  
-      console.log(`Nombre: ${nombre}, Detalle: ${detalle}`);
+      }      
       res.json({ message: 'Institución creada con éxito', id: results.insertId });
     });
 }); 
@@ -266,22 +258,33 @@ app.get('/generateQR', (req, res) => {
     });
 });
 
-// app.get('/api/ubicaciones', (req, res) => {
-//     const query = 'SELECT id, nombre FROM Ubicaciones';
+app.post('/crear-ubicacion', (req, res) => {
+    const { nombre, detalle, institucionId } = req.body;
+  
+    const query = 'INSERT INTO Ubicaciones (nombre, descripcion, institucion_id) VALUES (?, ?, ?)';
+    connection.query(query, [nombre, detalle, institucionId], (err, results) => {
+      if (err) {
+        console.error('Error al insertar en la base de datos:', err);
+        res.status(500).json({ message: 'Error al crear la ubicación' });
+        return;
+      }
+      res.json({ message: 'Ubicacion creada con éxito', id: results.insertId });
+    });
+}); 
 
-//     connection.query(query, (error, results) => {
-//         if (error) {
-//             console.error('Error en la consulta:', error);
-//             return res.status(500).json({ mensaje: 'Error al obtener las ubicaciones' });
-//         }
-
-//         if (results.length === 0) {
-//             return res.status(404).json({ mensaje: 'No se encontraron ubicaciones' });
-//         }
-
-//         res.json(results);
-//     });
-// });
+app.get('/api/ubicaciones/:institucionId', (req, res) => {
+    const { institucionId } = req.params;
+  
+    const query = 'SELECT * FROM Ubicaciones WHERE institucion_id = ?';
+    connection.query(query, [institucionId], (err, results) => {
+        if (err) {
+            console.error('Error al consultar las ubicaciones:', err);
+            res.status(500).json({ message: 'Error al obtener las ubicaciones' });
+            return;
+        }
+        res.json(results);
+    });
+});
 
 
 const PORT = process.env.PORT || 3000;

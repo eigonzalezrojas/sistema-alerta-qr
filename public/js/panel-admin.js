@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'block';
+        cargarInstitucionesForm('selectInstitucion');
         cargarUbicaciones();
     });
 
@@ -191,6 +192,10 @@ function cargarInstituciones() {
     });
 }
 
+function cargarUbicaciones() {
+    //AQUI PARA CREAR LOS QR
+}
+
 function cargarUbicacionesTabla() {
     fetch('/api/ubicaciones')
     .then(response => {        
@@ -244,24 +249,6 @@ function cargarUbicacionesTabla() {
     });
 }
 
-
-
-// function cargarUbicaciones() {
-//     fetch('/api/ubicaciones')
-//         .then(response => response.json())
-//         .then(ubicaciones => {
-//             const selectUbicacion = document.getElementById('selectUbicacion');
-//             selectUbicacion.innerHTML = '';
-//             ubicaciones.forEach(ubicacion => {
-//                 let option = document.createElement('option');
-//                 option.value = ubicacion.id;
-//                 option.textContent = ubicacion.nombre;
-//                 selectUbicacion.appendChild(option);
-//             });
-//         })
-//         .catch(error => console.error('Error al cargar ubicaciones:', error));
-// }
-
 function cambiarEstadoAlerta(idAlerta, nuevoEstadoId) {
     // Enviar la solicitud al servidor para cambiar el estado
     fetch('/api/cambiarEstadoAlerta', {
@@ -302,6 +289,17 @@ function cargarInstitucionesForm(formulario) {
         .catch(error => console.error('Error:', error));
 }
 
+function cargarUbicacionesPorInstitucion(institucionId) {
+    fetch(`/api/ubicaciones/${institucionId}`)
+        .then(response => response.json())
+        .then(ubicaciones => {
+            const selectUbicacion = document.getElementById('selectUbicacion');
+            selectUbicacion.innerHTML = '<option disabled selected>Seleccione una ubicación</option>'; // Opción predeterminada
+            selectUbicacion.innerHTML += ubicaciones.map(ubicacion => `<option value="${ubicacion.id}">${ubicacion.nombre}</option>`).join('');
+        })
+        .catch(error => console.error('Error:', error));
+}
+
 function validarRut(rut) {
     // Limpiar el RUT dejando solo números y el dígito verificador
     var valor = rut.replace(/[\.\-]/g, '');
@@ -332,6 +330,10 @@ function validarRut(rut) {
     return dvEsperado == dv;
 }
 
+document.getElementById('selectInstitucion').addEventListener('change', function () {
+    const institucionId = this.value; // Obtiene el ID de la institución seleccionada
+    cargarUbicacionesPorInstitucion(institucionId); // Llama a la función para cargar las ubicaciones
+});
 
 document.getElementById('btnGenerarQR').addEventListener('click', function() {
     const locationId = document.getElementById('selectUbicacion').value;
@@ -436,12 +438,7 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     var email = document.getElementById('emailUsuario').value;
     var rolId = document.getElementById('rolUsuario').value;
     var institucionId = document.getElementById('institucionUsuario').value;
-    
-    console.log("Valor de rut:", rut);
-    console.log("Valor de nombre:", nombre);
-    console.log("Valor de email:", email);
-    console.log("Valor de rolId:", rolId);
-    console.log("Valor de institucionId:", institucionId);
+
 
     if (!validarRut(rut)) {
         Swal.fire({
@@ -508,10 +505,9 @@ document.getElementById('formCrearInstitucion').addEventListener('submit', funct
     })
     .then(response => response.json())
     .then(data => {
-      // Muestra un mensaje de éxito con SweetAlert
       Swal.fire({
         title: '¡Éxito!',
-        text: data.message, // Mensaje de éxito desde el servidor
+        text: data.message,
         icon: 'success',
         confirmButtonText: 'OK'
       }).then(() => {
@@ -521,8 +517,7 @@ document.getElementById('formCrearInstitucion').addEventListener('submit', funct
     })
     .catch((error) => {
       console.error('Error:', error);
-  
-      // Muestra un mensaje de error con SweetAlert
+
       Swal.fire({
         title: 'Error',
         text: 'Hubo un problema al crear la institución.',
@@ -539,4 +534,45 @@ var modalUbicacion = new bootstrap.Modal(document.getElementById('modalCrearUbic
 document.getElementById('btnCrearUbicacion').addEventListener('click', function() {
     cargarInstitucionesForm('institucionUbicacion');
     modalUbicacion.show();
+});
+
+document.getElementById('formCrearUbicacion').addEventListener('submit', function(e) {
+    e.preventDefault();
+  
+    var nombre = document.getElementById('nombreUbicacion').value;
+    var detalle = document.getElementById('nombreSector').value;
+    var institucionId = document.getElementById('institucionUbicacion').value;
+  
+    fetch('/crear-ubicacion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nombre: nombre, detalle: detalle, institucionId: institucionId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      Swal.fire({
+        title: '¡Éxito!',
+        text: data.message,
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        cargarUbicacionesTabla();
+      });
+      modalUbicacion.hide();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+
+      Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al crear la institución.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        cargarUbicacionesTabla();
+      });
+      modalUbicacion.hide();
+    });
 });
