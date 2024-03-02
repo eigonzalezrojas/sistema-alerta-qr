@@ -62,8 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         seccionInstituciones.style.display = 'none';
         seccionUbicaciones.style.display = 'none';
         seccionQr.style.display = 'block';
-        cargarInstitucionesForm('selectInstitucion');
-        cargarUbicaciones();
+        cargarInstitucionesForm('selectInstitucion');        
     });
 
 });
@@ -190,10 +189,6 @@ function cargarInstituciones() {
             confirmButtonText: 'Cerrar'
         });
     });
-}
-
-function cargarUbicaciones() {
-    //AQUI PARA CREAR LOS QR
 }
 
 function cargarUbicacionesTabla() {
@@ -336,9 +331,21 @@ document.getElementById('selectInstitucion').addEventListener('change', function
 });
 
 document.getElementById('btnGenerarQR').addEventListener('click', function() {
-    const locationId = document.getElementById('selectUbicacion').value;
+    const institucionId = document.getElementById('selectInstitucion').value;
+    const ubicacionId = document.getElementById('selectUbicacion').value;
 
-    fetch(`/generateQR?locationId=${locationId}`)
+    // Asegúrate de que tanto la institución como la ubicación están seleccionadas
+    if (!institucionId || !ubicacionId) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Debes seleccionar una institución y una ubicación.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        });
+        return; // Detiene la ejecución si no hay selección
+    }
+
+    fetch(`/generateQR?institucionId=${institucionId}&ubicacionId=${ubicacionId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error en la solicitud al servidor. Estado: ' + response.status);
@@ -374,6 +381,7 @@ document.getElementById('btnGenerarQR').addEventListener('click', function() {
             });
         });
 });
+
 
 document.getElementById('btnImprimirQR').addEventListener('click', function() {
     var contenido = document.getElementById('contenedorImpresionQR').innerHTML;

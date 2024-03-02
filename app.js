@@ -247,16 +247,43 @@ app.post('/api/cambiarEstadoAlerta', async (req, res) => {
 });
 
 app.get('/generateQR', (req, res) => {
-    const locationId = req.query.locationId;
-    const qrUrl = `https://eithelgonzalezrojas.cl/menu.html?locationId=${locationId}`;    
-    QRCode.toDataURL(qrUrl, (err, dataUrl) => {
-        if (err) {
-            res.status(500).json({ error: 'Error al generar el código QR' });
-        } else {
-            res.json({ qrCode: dataUrl });
+    const { institucionId, ubicacionId } = req.query;
+
+    // Primero, validamos que ambos IDs fueron proporcionados
+    if (!institucionId || !ubicacionId) {
+        return res.status(400).json({ error: 'Se requieren los IDs de institución y ubicación' });
+    }
+
+    // Opcional: Buscar en la base de datos para asegurar que los IDs son válidos
+    const query = 'SELECT u.nombre AS ubicacionNombre, i.nombre AS institucionNombre '+
+                  'FROM Ubicaciones u '+
+                  'JOIN Institucion i ON i.id = u.institucion_id '+
+                  'WHERE u.id = ? AND i.id = ?';
+    connection.query(query, [ubicacionId, institucionId], (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al validar la institución y ubicación' });
         }
+
+        if (results.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron la institución o ubicación con los IDs proporcionados' });
+        }
+
+        // Si todo es correcto, generamos el URL para el QR
+        const { ubicacionNombre, institucionNombre } = results[0];
+        const qrUrl = `https://eithelgonzalezrojas.cl/menu.html?institucionId=${institucionId}&ubicacionId=${ubicacionId}&institucionNombre=${encodeURIComponent(institucionNombre)}&ubicacionNombre=${encodeURIComponent(ubicacionNombre)}`;
+
+        // Generar el código QR
+        QRCode.toDataURL(qrUrl, (err, dataUrl) => {
+            if (err) {
+                res.status(500).json({ error: 'Error al generar el código QR' });
+            } else {
+                res.json({ qrCode: dataUrl });
+            }
+        });
     });
 });
+
 
 app.post('/crear-ubicacion', (req, res) => {
     const { nombre, detalle, institucionId } = req.body;
