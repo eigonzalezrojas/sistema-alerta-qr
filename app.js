@@ -234,16 +234,17 @@ app.get('/api/ubicaciones', (req, res) => {
     });
 });
 
-app.post('/api/cambiarEstadoAlerta', async (req, res) => {
-    const { id, estadoId } = req.body;
+app.post('/api/cambiarEstadoAlerta', (req, res) => {
+    const { alertaId, nuevoEstadoId } = req.body;
+    const query = `UPDATE Alertas SET estado_id = ? WHERE id = ?`;
 
-    try {        
-        await db.query('UPDATE Alertas SET estadoId = ? WHERE id = ?', [estadoId, id]);
-        res.status(200).send('Estado actualizado');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error al actualizar el estado');
-    }
+    db.query(query, [nuevoEstadoId, alertaId], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar el estado de la alerta:', err);
+            return res.status(500).send('Error al actualizar el estado de la alerta');
+        }
+        res.send({ message: 'Estado actualizado con éxito', alertaId, nuevoEstadoId });
+    });
 });
 
 app.get('/generateQR', (req, res) => {
@@ -267,8 +268,6 @@ app.get('/generateQR', (req, res) => {
         }
     });
 });
-
-
 
 app.post('/crear-ubicacion', (req, res) => {
     const { nombre, detalle, institucionId } = req.body;
@@ -298,8 +297,46 @@ app.get('/api/ubicaciones/:institucionId', (req, res) => {
     });
 });
 
+app.post('/api/registrarAlerta', (req, res) => {
+    const { tipo_alerta_id, usuario_id, descripcion, estado_id, ubicacion_id, institucion_id } = req.body;
+    const query = `INSERT INTO Alertas (tipo_alerta_id, usuario_id, descripcion, estado_id, ubicacion_id, institucion_id, fecha_hora) VALUES (?, ?, ?, ?, ?, ?, NOW())`;
+
+    connection.query(query, [tipo_alerta_id, usuario_id, descripcion, estado_id, ubicacion_id, institucion_id], (err, result) => {
+        if (err) {
+            console.error('Error al insertar la alerta:', err);            
+            return res.status(500).json({ error: 'Error al registrar la alerta' });
+        }
+        res.json({ message: 'Alerta registrada con éxito' });
+    });
+});
+
+app.get('/api/alertas', (req, res) => {
+    const query = `
+        SELECT 
+            Alertas.id, 
+            Alertas.descripcion, 
+            Alertas.fecha_hora, 
+            Alertas.estado_id, 
+            Institucion.nombre AS nombre_institucion, 
+            Ubicaciones.nombre AS nombre_ubicacion,
+            TiposAlerta.nombre AS nombre_tipo_alerta
+        FROM Alertas
+        LEFT JOIN Institucion ON Alertas.institucion_id = Institucion.id
+        LEFT JOIN Ubicaciones ON Alertas.ubicacion_id = Ubicaciones.id
+        LEFT JOIN TiposAlerta ON Alertas.tipo_alerta_id = TiposAlerta.id`;
+
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener las alertas:', err);
+            return res.status(500).json({ error: 'Error al obtener las alertas' });
+        }
+        res.json(results);
+    });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+ 

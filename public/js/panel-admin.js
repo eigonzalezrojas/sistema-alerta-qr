@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     seccionInstituciones.style.display = 'none';
     seccionUbicaciones.style.display = 'none';
     seccionQr.style.display = 'none';
+    cargarAlertas();
 
 
     linkAlertas.addEventListener('click', function (event) {
@@ -66,40 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 });
-
-function cargarAlertas() {
-    fetch('/api/alertas')
-    .then(response => response.json())
-    .then(alertas => {
-        const tablaAlertasBody = document.getElementById('tablaAlertasBody');
-        tablaAlertasBody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
-        alertas.forEach(alerta => {
-            let fila = tablaAlertasBody.insertRow();
-            // Añadir las celdas con los datos de la alerta
-            fila.insertCell(0).textContent = alerta.id;
-            fila.insertCell(1).textContent = alerta.nombre;
-            fila.insertCell(2).textContent = alerta.descripcion;
-            fila.insertCell(3).textContent = alerta.estadoActual;
-
-            let celdaFecha = fila.insertCell(4);
-            celdaFecha.textContent = formatearFecha(alerta.fecha);
-
-            // Celda para el menú desplegable de estados
-            let celdaEstado = fila.insertCell(4);
-            let selectEstado = document.createElement('select');
-            selectEstado.classList.add('form-select');
-            selectEstado.innerHTML = `
-                <option value="1">Pendiente</option>
-                <option value="2">En Proceso</option>
-                <option value="3">Resuelta</option>
-            `;
-            selectEstado.value = alerta.estadoActualId; // Asumiendo que cada alerta tiene un estadoActualId
-            selectEstado.addEventListener('change', (e) => cambiarEstadoAlerta(alerta.id, e.target.value));
-            celdaEstado.appendChild(selectEstado);
-        });
-    })
-    .catch(error => console.error('Error:', error));
-}
 
 function cargarUsuarios() {
     fetch('/api/usuarios')
@@ -325,6 +292,52 @@ function validarRut(rut) {
     return dvEsperado == dv;
 }
 
+function cargarAlertas() {
+    fetch('/api/alertas')
+        .then(response => response.json())
+        .then(alertas => {
+            const tablaBody = document.getElementById('tablaAlertasBody');
+            tablaBody.innerHTML = ''; // Limpiar la tabla antes de cargar nuevas filas
+            alertas.forEach(alerta => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${alerta.id}</td>
+                    <td>${alerta.nombre_tipo_alerta}</td>
+                    <td>${alerta.nombre_institucion}</td>
+                    <td>${alerta.nombre_ubicacion}</td>
+                    <td>${alerta.descripcion}</td>
+                    <td>${new Date(alerta.fecha_hora).toLocaleString()}</td>
+                    <td>
+                        <select onchange="cambiarEstado(${alerta.id}, this.value)">
+                            <option value="1" ${alerta.estado_id === 1 ? 'selected' : ''}>Pendiente</option>
+                            <option value="2" ${alerta.estado_id === 2 ? 'selected' : ''}>En Proceso</option>
+                            <option value="3" ${alerta.estado_id === 3 ? 'selected' : ''}>Cerrado</option>
+                        </select>
+                    </td>`;
+                tablaBody.appendChild(fila);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function cambiarEstado(alertaId, nuevoEstadoId) {
+    fetch('/api/cambiarEstadoAlerta', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ alertaId, nuevoEstadoId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Estado actualizado con éxito', data);
+        // Aquí podrías agregar lógica para reflejar el cambio en la interfaz de usuario
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 document.getElementById('selectInstitucion').addEventListener('change', function () {
     const institucionId = this.value; // Obtiene el ID de la institución seleccionada
     cargarUbicacionesPorInstitucion(institucionId); // Llama a la función para cargar las ubicaciones
@@ -381,7 +394,6 @@ document.getElementById('btnGenerarQR').addEventListener('click', function() {
             });
         });
 });
-
 
 document.getElementById('btnImprimirQR').addEventListener('click', function() {
     var contenido = document.getElementById('contenedorImpresionQR').innerHTML;
