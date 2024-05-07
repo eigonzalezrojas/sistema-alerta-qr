@@ -153,6 +153,28 @@ app.get('/api/usuarios', (req, res) => {
     });
 });
 
+app.delete('/api/eliminar-usuario/:rut', (req, res) => {
+    const rut = req.params.rut;
+    const query = `DELETE FROM Usuarios WHERE rut = ?`;  // Utilizar placeholders para prevenir SQL Injection
+
+    connection.query(query, [rut], (error, results) => {
+        if (error) {
+            console.error('Error en la consulta:', error);
+            return res.status(500).json({ mensaje: 'Error al eliminar usuario' });
+        }
+        
+        // Verifica si se eliminó algún registro
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'No se encontró el usuario con el RUT proporcionado' });
+        }
+
+        // Si se eliminó un registro, enviar esta respuesta
+        res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
+    });
+});
+
+
+
 app.post('/crear-usuario', (req, res) => {
     const { rut, nombre, email, rolId, institucionId } = req.body;
 

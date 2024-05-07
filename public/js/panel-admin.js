@@ -82,7 +82,7 @@ function cargarUsuarios() {
             fila.insertCell(2).textContent = usuario.rut;
             fila.insertCell(3).textContent = usuario.rol;
             fila.insertCell(4).textContent = usuario.institucion;
-
+            
             // Celda para los botones de acción
             let celdaAcciones = fila.insertCell(5);
 
@@ -91,7 +91,7 @@ function cargarUsuarios() {
             botonEditar.textContent = "Editar";
             botonEditar.classList.add("btn", "btn-warning");
             botonEditar.onclick = function() {
-                editarUsuario(usuario.id); // Reemplazar con tu función de edición
+                editarUsuario(usuario.id);                
             };
             celdaAcciones.appendChild(botonEditar);
 
@@ -100,13 +100,55 @@ function cargarUsuarios() {
             botonEliminar.textContent = "Eliminar";
             botonEliminar.classList.add("btn", "btn-danger");
             botonEliminar.onclick = function() {
-                eliminarUsuario(usuario.id); // Reemplazar con tu función de eliminación
+                eliminarUsuario(usuario.rut);
             };
             celdaAcciones.appendChild(botonEliminar);
         });
     })
     .catch(error => console.error('Error:', error));
 }
+
+
+function eliminarUsuario(rut) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/api/eliminar-usuario/${rut}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'El usuario ha sido eliminado.',
+                        'success'
+                    );
+                    cargarUsuarios();
+                } else {
+                    throw new Error('Error al eliminar el usuario');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error',
+                    'No se pudo eliminar el usuario: ' + error.message,
+                    'error'
+                );
+            });
+        }
+    })
+}
+
+
 
 function cargarInstituciones() {
     fetch('/api/instituciones')
